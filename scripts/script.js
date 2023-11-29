@@ -1,101 +1,96 @@
-// fetch(`https://rickandmortyapi.com/api/character`)
-//   .then((response) => response.json())
-//   .then((data) => {
-//     const totalPages = data.info.pages;
+// pour supprimer les cards au click d'un autre btn
+let cardsContainer = document.createElement('div');
+cardsContainer.className = 'cardscontainer';
+document.body.appendChild(cardsContainer);
+// boutons
+let btnPerso = document.querySelector('.personnages');
+btnPerso.addEventListener('click', function () {
+  fetchCards('https://rickandmortyapi.com/api/character');
+});
 
-//     for (let i = 1; i <= totalPages; i++) {
-//       let url = `https://rickandmortyapi.com/api/character?page=${i}`;
-//       fetch(url)
-//         .then((response) => response.json())
-//         .then((pageData) => {
-//           pageData.results.forEach((character) => {
-//             let newCard = document.createElement('div');
-//             newCard.className = 'card';
+let btnLieux = document.querySelector('.lieux');
+btnLieux.addEventListener('click', function () {
+  fetchCards('https://rickandmortyapi.com/api/location');
+});
 
-//             let newName = document.createElement('h2');
-//             newName.textContent = character.name;
+let btnEpisodes = document.querySelector('.episodes');
+btnEpisodes.addEventListener('click', function () {
+  fetchCards('https://rickandmortyapi.com/api/episode');
+});
 
-//             let newImg = document.createElement('img');
-//             newImg.src = character.image;
+// Fonction pour fetch
 
-//             newCard.appendChild(newName);
-//             newCard.appendChild(newImg);
+function fetchCards(apiUrl) {
+  cardsContainer.innerHTML = ''; // Effacez le contenu du conteneur existant
 
-//             document.body.appendChild(newCard);
-//           });
-//         });
-//     }
-//   });
+  fetch(apiUrl)
+    .then((response) => response.json())
+    .then((data) => {
+      const totalPages = data.info.pages;
 
-// fetch(`https://rickandmortyapi.com/api/location`)
-//   .then((response) => response.json())
-//   .then((data) => {
-//     const totalPages = data.info.pages;
+      for (let i = 1; i <= totalPages; i++) {
+        let url = `${apiUrl}?page=${i}`;
+        fetch(url)
+          .then((response) => response.json())
+          .then((pageData) => {
+            pageData.results.forEach((result) => {
+              let newCard = document.createElement('div');
+              newCard.className = 'card';
 
-//     for (let i = 1; i <= totalPages; i++) {
-//       let url = `https://rickandmortyapi.com/api/location?page=${i}`;
-//       fetch(url)
-//         .then((response) => response.json())
-//         .then((pageData) => {
-//           pageData.results.forEach((location) => {
-//             let newCard = document.createElement('div');
-//             newCard.className = 'card';
+              // personnages
+              if (apiUrl.includes('character')) {
+                let newName = document.createElement('h2');
+                newName.textContent = result.name;
 
-//             let newName = document.createElement('h2');
-//             newName.textContent = location.name;
+                let newImg = document.createElement('img');
+                newImg.src = result.image;
 
-//             let newDimension = document.createElement('p');
-//             newDimension.textContent = `Dimension: ${location.dimension}`;
+                newCard.appendChild(newName);
+                newCard.appendChild(newImg);
+              }
+              //   lieux
+              else if (apiUrl.includes('location')) {
+                let newName = document.createElement('h2');
+                newName.textContent = result.name;
 
-//             let newResidents = document.createElement('p');
+                let newDimension = document.createElement('p');
+                newDimension.textContent = `Dimension: ${result.dimension}`;
 
-//             location.residents.forEach((residentUrl) => {
-//               fetch(residentUrl)
-//                 .then((response) => response.json())
-//                 .then((residentData) => {
-//                   let residentName = document.createElement('span');
-//                   residentName.textContent = `Resident: ${residentData.name}`;
-//                   newResidents.appendChild(residentName);
-//                 });
-//             });
+                let newResidents = document.createElement('p');
 
-//             newCard.appendChild(newName);
-//             newCard.appendChild(newDimension);
-//             newCard.appendChild(newResidents);
+                result.residents.forEach((residentUrl) => {
+                  fetch(residentUrl)
+                    .then((response) => response.json())
+                    .then((residentData) => {
+                      let residentName = document.createElement('span');
+                      residentName.textContent = `Resident: ${residentData.name}`;
+                      newResidents.appendChild(residentName);
+                    });
+                });
 
-//             document.body.appendChild(newCard);
-//           });
-//         });
-//     }
-//   });
-fetch(`https://rickandmortyapi.com/api/episode`)
-  .then((response) => response.json())
-  .then((data) => {
-    const totalPages = data.info.pages;
+                newCard.appendChild(newName);
+                newCard.appendChild(newDimension);
+                newCard.appendChild(newResidents);
+              }
+              //   épisodes
+              else if (apiUrl.includes('episode')) {
+                let newId = document.createElement('h2');
+                newId.textContent = result.id;
 
-    for (let i = 1; i <= totalPages; i++) {
-      let url = `https://rickandmortyapi.com/api/episode?page=${i}`;
-      fetch(url)
-        .then((response) => response.json())
-        .then((pageData) => {
-          pageData.results.forEach((episode) => {
-            let newCard = document.createElement('div');
-            newCard.className = 'card';
+                let newName = document.createElement('p');
+                newName.textContent = result.name;
 
-            let newId = document.createElement('h2');
-            newId.textContent = episode.id;
+                let newDate = document.createElement('p');
+                newDate.textContent = result.air_date;
 
-            let newName = document.createElement('p');
-            newName.textContent = episode.name;
+                newCard.appendChild(newId);
+                newCard.appendChild(newName);
+                newCard.appendChild(newDate);
+              }
 
-            let newDate = document.createElement('p');
-            newDate.textContent = episode.air_date;
-            newCard.appendChild(newId);
-            newCard.appendChild(newName);
-            newCard.appendChild(newDate);
-
-            document.body.appendChild(newCard);
+              cardsContainer.appendChild(newCard);
+            });
           });
-        });
-    }
-  });
+      }
+    });
+}
